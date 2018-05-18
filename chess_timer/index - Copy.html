@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Emad timer, fuck omran</title>
+	<style type="text/css">
+    h1{
+    color: #e2e2e2;
+    }
+    [active='true']{
+    	background-color:orange;
+    	color: white;
+    }
+    [active='false']{
+    	background-color:grey;
+    	color: balck;
+    	border: 2px solid black;
+    }
+    [active='warning']{
+    	background-color: red;
+    }
+    .box{
+    	height:250px;
+    	width:400px;
+    	line-height:250px;
+    	text-align:center;
+    	font-size:150px;
+    	border-radius:10px;
+    }
+    #box1{
+    	-webkit-transform: rotate(180deg);
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+</head>
+<body>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Settings, عمران خول</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+			<table>
+				<tr>
+					<td>Seconds:</td>
+					<td><input type="number" min="0" max="59" id="seconds" placeholder="seconds" value="10"></td>
+					<td>Tick Sound:</td>
+					<td>
+						<select id="enable-tick">
+							<option value="enabled">Enabled</option>
+							<option value="disabled">Disabled</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Minutes:</td>
+					<td><input type="number" min="0" max="100" id="minutes" placeholder="minutes"></td>
+					<td>Danger Sound:</td>
+					<td>
+						<select id="enable-warning">
+							<option value="enabled">Enabled</option>
+							<option value="disabled">Disabled</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Warning(S):</td>
+					<td><input type="number" min="0" max="60" id="warning" placeholder="seconds" value="5"></td>
+					<td>Timeout Sound:</td>
+					<td>
+						<select id="enable-timeout">
+							<option value="enabled">Enabled</option>
+							<option value="disabled">Disabled</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<audio id="audio1" controls="controls" >
+   <source src="bell.mp3" type="audio/mp3" />
+</audio>
+<audio id="audio2" controls="controls" >
+   <source src="fastTick.mp3" type="audio/mp3" />
+</audio>
+<button type="button" onclick="funcPlay()">play 1</button>
+<button type="button" onclick="funcPlay2()">play 2</button>
+<script type="text/javascript">
+	function funcPlay(){
+		document.getElementById("audio1").play();
+	}
+	function funcPlay2(){
+		document.getElementById("audio2").play();
+	}
+</script>
+	</p>
+	<p id="status"></p>
+
+<div class="box" id='box1' active='false'>..</div>
+<br>
+<div class="box" id='box2' active='true'>..</div>
+<br>
+<!-- Trigger the modal with a button -->
+<button type="button" class="btn" data-toggle="modal" data-target="#myModal" style="margin: 5px 0;">Settings</button>
+
+
+
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript" src="modal.js"></script>
+<script>
+
+
+
+$("#box1, #box2").click(function(){
+
+	//clear status msg box
+	document.getElementById("status").innerText = "";
+
+	var normalTickEnabled = $("#enable-tick").val();
+	var warningTickEnabled = $("#enable-warning").val();
+	var timeOutSoundEnabled = $("#enable-timeout").val();
+
+	var seconds = parseInt($("#seconds").val() == "" ? 0 : $("#seconds").val()) + $("#minutes").val() * 60;
+	var warningTime = parseInt($("#warning").val());
+	if(warningTime >= seconds){
+		document.getElementById("status").innerText = "too early warning time compared to single move time";
+		return;
+	}
+
+	var thisBoxID = $(this).attr('id');
+	var otherBoxID = (thisBoxID == 'box1') ? "box2" : "box1";
+	//console.log(thisBoxID + " otherbox: " + otherBoxID);
+	var activeOrNot = $(this).attr('active');
+	if (activeOrNot == 'true'){
+
+		//if variable omda is definded and not null
+		if(typeof(omda) != "undefined" && omda !== null)
+			clearInterval(omda);
+		
+		
+		if (isNaN(seconds) || seconds <= 0)
+			document.getElementById("status").innerText = "Wrong time format ya mtnak";
+		else {
+
+			//reset the two boxes
+			//seconsd in term of minutes	
+			document.getElementById("box1").innerText = parseInt(seconds / 60) + ":" + seconds % 60;
+			document.getElementById("box2").innerText = parseInt(seconds / 60) + ":" + seconds % 60;
+
+			//deactivate this box
+			document.getElementById(thisBoxID).setAttribute('active', 'false');
+			
+			//activate the other box
+			document.getElementById(otherBoxID).setAttribute('active', 'true');
+
+			
+			omda = setInterval(function(){
+				
+				seconds--;
+				var timeTextMin = parseInt(seconds / 60), timeTextSec = seconds % 60;
+				var timeText = timeTextSec;
+				if (timeTextMin > 0)
+					timeText = "" + timeTextMin + ":" + timeTextSec;
+
+				document.getElementById(otherBoxID).innerText = timeText;
+
+				if (seconds == 0){
+					if(timeOutSoundEnabled == "enabled"){
+						var timeOutBell = new Audio('bell.mp3');
+						timeOutBell.play();
+						timeOutBell = null;
+					}
+					clearInterval(omda);
+				} else if(warningTime != "" && seconds < warningTime && !isNaN(warningTime)){
+
+					if(warningTickEnabled == "enabled"){
+						var fastTick = new Audio('fastTick.mp3');
+						fastTick.play();
+						fastTick = null;
+					}
+
+					var activeType = $("#" + otherBoxID).attr('active');
+					if(activeType == "true")
+						document.getElementById(otherBoxID).setAttribute('active', 'warning');
+					else if(activeType == "warning")
+						document.getElementById(otherBoxID).setAttribute('active', 'true');
+
+				}
+				else if(normalTickEnabled == "enabled"){
+					var normalTick = new Audio('normalTick.mp3');
+					normalTick.play();
+					normalTick = null;
+				}
+
+			}, 1000); // end interbal
+		} // end else (time is set and everythig is okay)
+
+	} // user clicked the current active box, not the inactive one
+}); // end click function
+</script>
+</body>
+</html>
+
+    
